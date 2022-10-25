@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+
+# author: The in the world
+# Version: 0.0.1
+# Notes: n/a
+
+
+
+USAGE(){
+	echo $1
+	echo -e "
+
+}

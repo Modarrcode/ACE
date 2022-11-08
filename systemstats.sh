@@ -11,18 +11,19 @@ USAGE(){
 	echo $1
 	echo -e "\nUsage:\n systemStats [-t temperature] [-f core-frequency] [-c cores] [-V volts]"
 	echo -e "\t\t [-m arm mem] [-M gpu mem] [-f free memory] [-i ipv4 and ipv6 address]"
-	echo -e "\t\t [-v version] [-h help]"
+	echo -e "\t\t [-v version] [-h help] [-s storage] [-d Directory]"
 	echo -e "\t\t more information see: man systemstats"
 
 }
 
 # Check for arguments
 
-if [ $# -lt 1 ];then
-	USAGE "No argument detected"
+if [$# -lt 1];then
+	USAGE "No argument detected/invalid argument"
 	exit 1
-elif [ $# -gt 10 ];then
+elif [[($# -gt 10) || ($@ -gt 1)]];then
 	USAGE "Too many arguments"
+	exit 1
 elif [[ ( $1 == '--help') || ( $1 == '-h' ) ]];then
 	USAGE "Help"
 	exit 0
@@ -34,7 +35,7 @@ fi
 # with flags method,some of the arguments can be made optional
 #'a:b' means that 'a' is mandatory and requires an argument after the 'a' and 'b' is not, 'abc' means they all are optional
 
-while getopts tfcVmMfivh OPTION
+while getopts tfcVmMfivhsd OPTION
 do
 case ${OPTION}
 in
@@ -53,7 +54,11 @@ i) IFCONFIG=$(ifconfig wlan0 | grep inet -m 1  | awk '{print$2}')
 c) CPU=$(cat /sys/devices/system/cpu/present)
     echo "Core amounts: ${CPU}";;
 V) VOLTS=$(vcgencmd measure_volts | awk -F '=' '{print$2}')
-     echo "Voltage: ${VOLTS}";;
+    echo "Voltage: ${VOLTS}";;
+s) STORAGE=$(df -h | grep root | awk '{print "Total Storage Available: " $2 " Used: " $3 " Available: " $4 " Used Percent: " $5}')
+    echo "Storage statistics: ${STORAGE}";;
+d) DIRECTORYSIZE=$(du -s -h --si ~/ACE)
+    echo "ACE Directory size: ${DIRECTORYSIZE}";;
 
 *)  USAGE "\n ${*} argument was not recognised";;
 esac
